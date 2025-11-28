@@ -1,14 +1,17 @@
+import tkinter
 from tkinter import *
 from tkinter import filedialog
 import json
 
 #-------------------------------- BUTTON FUNC --------------------------------#
 class ButtonFunc:
-    def __init__(self, root, overview_canvas, log_canvas, button_use, button_edit, header_1, column_1, column_2):
+    def __init__(self, root, overview_canvas, log_canvas, button_use, button_edit, header_1, column_1, column_2, note_dic, note_label):
         self.column_1 = column_1
         self.column_2 = column_2
         self.button_load = ""
         self.header = header_1
+        self.note_dic = note_dic
+        self.note_label = note_label
         self.overview_canvas = overview_canvas
         self.button_use = button_use
         self.button_edit = button_edit
@@ -57,6 +60,8 @@ class ButtonFunc:
             data["cost_ap"] = abs(ap)
         elif ap > 0:
             data["gain_ap"] = ap
+        if self.rainbow.get():
+            data["flex"] = self.rainbow.get()
         return data
     def new_action(self):
         self.popup = Toplevel(self.master)
@@ -97,6 +102,7 @@ class ButtonFunc:
         ap_spinbox.delete(0, "end")
         ap_spinbox.insert(0, 0)
         ap_spinbox.grid(row=15, column=1, sticky="w")
+
         create_action_button = Button(master=self.popup,
                                       text="Aktion erstellen",
                                       command=lambda: self.create_new_button(
@@ -154,13 +160,77 @@ class ButtonFunc:
         else:
             row = (index // 2) + 3
             col = (index % 2) + category[1]
-        print("check")
         # -------------------------------- DYNAMIC BUTTON FUNC --------------------------------#
         def on_button_click(name=button_name):
             data = next((item for item in self.button_config[category[0]] if item["name"] == name))
             self.data = data
             def use_click():
-                print(self.data)
+                colors = ["red", "green", "blue", "gold", "black", "white"]
+                for i in kwargs:
+                    if i.split("_")[0] == "gain":
+                        if i.split("_")[1] in colors:
+                            self.note_dic[i.split("_")[1].capitalize()] += 1
+                            self.note_label[i.split("_")[1].capitalize()]["count"].config(text=self.note_dic[i.split("_")[1].capitalize()])
+                        elif i.split("_")[1] == "ap":
+                            pass
+                        else:
+                            continue
+                    elif i.split("_")[0] == "cost":
+                        if i.split("_")[1] in colors:
+                            self.note_dic[i.split("_")[1].capitalize()] -= 1
+                            self.note_label[i.split("_")[1].capitalize()]["count"].config(text=self.note_dic[i.split("_")[1].capitalize()])
+                        elif i.split("_")[1] == "ap":
+                            pass
+                        else:
+                            continue
+                    elif i.split("_")[0] == "flex":
+                        if kwargs[i]:
+                            self.popup = Toplevel(self.master)
+                            self.popup.geometry("550x390")
+                    else:
+                        continue
+
+
+            def edit_click():
+                self.button_edit.config(state="disabled")
+                self.popup = Toplevel(self.master)
+                self.popup.geometry("550x390")
+                name_label = Label(master=self.popup,text="Name")
+                name_label.grid(row=0, column=0)
+                name_entry = Entry(master=self.popup)
+                name_entry.grid(row=0, column=1)
+                name_entry.insert(END, name)
+                row_i = 0
+                entries = {}
+                for i in kwargs:
+                    column_i = 0
+                    row_i += 1
+                    if i == "row" or i == "column":
+                        continue
+                    else:
+                        kwargs_label = Label(master=self.popup, text=i)
+                        kwargs_label.grid(row=row_i,column=column_i)
+                        column_i += 1
+                        e = Entry(master=self.popup)
+                        e.grid(row=row_i, column=column_i)
+                        e.insert(END, kwargs[i])
+                        entries[i] = e
+
+
+                def edit_accept_button():
+                    index_num = next(
+                        (index for (index, d) in enumerate(self.button_config[category[0]]) if d["name"] == name), None)
+                    self.button_config[category[0]][index_num]["name"] = name_entry.get()
+                    entries_dic = {k: v.get() for (k, v) in entries.items()}
+                    self.button_config[category[0]][index_num].update(entries_dic)
+                    self.popup.destroy()
+                def edit_cancel_button():
+                    self.popup.destroy()
+                accept_button = Button(master=self.popup ,text="Anwenden", command=edit_accept_button)
+                accept_button.grid(row=row_i+1, column=0)
+                cancel_button = Button(master=self.popup ,text="Abbrechen", command=edit_cancel_button)
+                cancel_button.grid(row=row_i+1, column=1)
+
             self.header.config(
                 text=data['name'],
                 anchor="center"
@@ -178,7 +248,7 @@ class ButtonFunc:
             )
 
             self.button_use.config(state="normal", command=use_click)
-            self.button_edit.config(state="normal")
+            self.button_edit.config(state="normal", command=edit_click)
 
 
         new_button = Button(master=self.master, text=button_name, width=12, command=on_button_click)
@@ -197,6 +267,7 @@ class ButtonFunc:
             **base_data
         })
         self.load_status = False
+
     # -------------------------------- SAVE --------------------------------#
     def save(self):
         with open("data.json", "w") as json_file:
@@ -226,3 +297,6 @@ class ButtonFunc:
                 kwargs = {k: v for k, v in item.items() if k != "name"}
                 self.load_status = True
                 self.create_new_button(name, category_load, **kwargs)
+
+
+

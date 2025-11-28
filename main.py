@@ -123,10 +123,10 @@ header_1.grid(row=0, column=0, sticky="nsew")
 header_2 = Label(master=header_frame, background="antique white", text="Auswirkung", bd=1, relief="solid")
 header_2.grid(row=0, column=1, sticky="nsew")
 
-column_1 = Label(master=header_frame, background="lavender", text="", bd=1, relief="solid")
+column_1 = Label(master=header_frame, background="lavender", text="", bd=1, relief="solid", wraplength="5c")
 column_1.grid(row=1, column=0, sticky="nsew")
 
-column_2 = Label(master=header_frame, background="lavender", text="", bd=1, relief="solid")
+column_2 = Label(master=header_frame, background="lavender", text="", bd=1, relief="solid", wraplength="5c")
 column_2.grid(row=1, column=1, sticky="nsew")
 
 #-------------------------------- ÜBERSICHT_BUTTON --------------------------------#
@@ -137,7 +137,7 @@ edit_button.grid(row=26, column=4)
 
 
 #-------------------------------- BOTTOM BUTTON CLASS --------------------------------#
-button_actions = ButtonFunc(root=root, overview_canvas=overview_canvas,log_canvas=log_canvas, button_use=use_button, button_edit=edit_button, header_1=header_1, column_1=column_1, column_2=column_2)
+button_actions = ButtonFunc(root=root, overview_canvas=overview_canvas,log_canvas=log_canvas, button_use=use_button, button_edit=edit_button, header_1=header_1, column_1=column_1, column_2=column_2, note_dic=notes.color_dic, note_label=note_widgets)
 #-------------------------------- BOTTOM BUTTONS --------------------------------#
 new_action_button = Button(text="Neue Aktion", command= button_actions.new_action)
 new_action_button.grid(row=99, column=0, columnspan=2, sticky="s")
